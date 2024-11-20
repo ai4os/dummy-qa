@@ -1,0 +1,22 @@
+metadata_version: 2.0.0
+title: Dummy QA repository
+summary: This is a dummy module for Jenkinsfile testing
+description: |-
+  This repo is to test Jenkinsfiles and implementation of different stages before adding them in production pipelines
+
+dates:
+  created: '2024-11-20'
+  updated: '2024-11-20'
+links:
+  source_code: https://github.com/ai4os/dummy-qa
+  docker_image: ai4oshub/dummy-qa
+tags:
+  - testing
+  - Jenkinsfile
+tasks:
+  - Other
+categories:
+  - AI4 tools
+libraries:
+  - Other
+data-type: []

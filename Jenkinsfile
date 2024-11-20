@@ -157,18 +157,13 @@ pipeline {
             steps {
                 script {
                     //PAPI_URL = env.AI4OS_PAPI_URL
-                    TOKEN = "asdfghjk"
-                    CURL_CALL = "curl -si -X PUT https://api.dev.ai4eosc.eu/v1/catalog/tools/${env.REPO_NAME}/refresh -H 'accept: application/json' -H 'Authorization: Bearer ${TOKEN}'"
-                    response = sh (returnStdout: true, script: "${CURL_CALL}").trim()
-                    println("RESPONSE: ${response}")
+                    TOOLS_REFRESH_ROUTE = "/v1/catalog/tools/${env.REPO_NAME}/refresh"
+                    CURL_PAPI_CALL = "curl -si -X PUT ${env.AI4OS_PAPI_URL}${TOOLS_REFRESH_ROUTE} -H 'accept: application/json' -H 'Authorization: Bearer ${env.AI4OS-PAPI-refresh-secret}'"
+                    response = sh (returnStdout: true, script: "${CURL_PAPI_CALL}").trim()
                     status_code = sh (returnStdout: true, script: "echo '${response}' |grep HTTP | awk '{print \$2}'").trim()
-                    println("STATUS_CODE: ${status_code}")
                     if (status_code != 200 && status_code != 201) {
-                        error("Returned status code = $status_code when calling $CURL_CALL")
+                        error("Returned status code = $status_code when calling $CURL_PAPI_CALL")
                     }
-                    //catchError(stageResult: 'FAILURE', buildResult: currentBuild.result) {
-                    //    error 'example of throwing an error'
-                    //}
                 }
             }
         }

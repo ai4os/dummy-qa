@@ -24,7 +24,7 @@ pipeline {
         TOOLS = sh (returnStdout: true, script: "curl -s ${TOOLS_CATALOG_URL}").trim()
         METADATA_VERSION = "2.0.0"
         AI4OS_REGISTRY_CREDENTIALS = credentials('AIOS-registry-credentials')
-        AI4OS_PAPI_SECRET = credentials('AIOS-PAPI-refresh-secret')
+        AI4OS_PAPI_SECRET = credentials('AI4OS-PAPI-refresh-secret')
     }
     stages {
         stage("Variable initialization") {

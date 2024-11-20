@@ -36,7 +36,7 @@ pipeline {
                         DOCKER_REGISTRY_ORG = env.AI4OS_REGISTRY_REPOSITORY
                         DOCKER_REGISTRY_CREDENTIALS = env.AI4OS_REGISTRY_CREDENTIALS
                         // remove training "/" if present
-                        AI4OS_PAPI_URL = "${env.AI4OS_PAPI_URL.endsWith("/") ? env.AI4OS_PAPI_URL[0..-1] : env.AI4OS_PAPI_URL}"
+                        AI4OS_PAPI_URL = "${env.AI4OS_PAPI_URL.endsWith("/") ? env.AI4OS_PAPI_URL[0..-2] : env.AI4OS_PAPI_URL}"
                     }
                     // docker repository
                     DOCKER_REPO = DOCKER_REGISTRY_ORG + "/" + env.REPO_NAME

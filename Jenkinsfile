@@ -32,14 +32,15 @@ pipeline {
                 script {
                     checkout scm
                     withFolderProperties{
-                        env.DOCKER_REGISTRY = env.AI4OS_REGISTRY
-                        env.DOCKER_REGISTRY_ORG = env.AI4OS_REGISTRY_REPOSITORY
-                        env.DOCKER_REGISTRY_CREDENTIALS = env.AI4OS_REGISTRY_CREDENTIALS
+                        DOCKER_REGISTRY = env.AI4OS_REGISTRY
+                        DOCKER_REGISTRY_ORG = env.AI4OS_REGISTRY_REPOSITORY
+                        DOCKER_REGISTRY_CREDENTIALS = env.AI4OS_REGISTRY_CREDENTIALS
+                        AI4OS_PAPI_URL = env.AI4OS_PAPI_URL 
                     }
                     // docker repository
-                    env.DOCKER_REPO = env.DOCKER_REGISTRY_ORG + "/" + env.REPO_NAME
+                    DOCKER_REPO = DOCKER_REGISTRY_ORG + "/" + env.REPO_NAME
                     // define base tag from branch name
-                    env.IMAGE_TAG = "${env.BRANCH_NAME == 'main' ? 'latest' : env.BRANCH_NAME}"
+                    IMAGE_TAG = "${env.BRANCH_NAME == 'main' ? 'latest' : env.BRANCH_NAME}"
 
                 }
             }
@@ -128,10 +129,9 @@ pipeline {
                 script {
                     checkout scm
                     dockerfile = "Dockerfile"
-                    image_tag = env.IMAGE_TAG
-                    image = (env.DOCKER_REPO + ":" + image_tag).toLowerCase()
-                    println ("[DEBUG] Config for the Docker image build: ${image}, push to $env.DOCKER_REGISTRY")
-                    docker.withRegistry(env.DOCKER_REGISTRY, env.DOCKER_REGISTRY_CREDENTIALS){
+                    image = (DOCKER_REPO + ":" + IMAGE_TAG).toLowerCase()
+                    println ("[DEBUG] Config for the Docker image build: ${image}, push to $DOCKER_REGISTRY")
+                    docker.withRegistry(DOCKER_REGISTRY, DOCKER_REGISTRY_CREDENTIALS){
                          def app_image = docker.build(image,
                                                       "--no-cache --force-rm -f ${dockerfile} .")
                          app_image.push()
@@ -157,9 +157,8 @@ pipeline {
             }
             steps {
                 script {
-                    //PAPI_URL = env.AI4OS_PAPI_URL
                     TOOLS_REFRESH_ROUTE = "/v1/catalog/tools/${env.REPO_NAME}/refresh"
-                    CURL_PAPI_CALL = "curl -si -X PUT ${env.AI4OS_PAPI_URL}${TOOLS_REFRESH_ROUTE} -H 'accept: application/json' -H 'Authorization: Bearer ${env.AI4OS_PAPI_SECRET}'"
+                    CURL_PAPI_CALL = "curl -si -X PUT ${AI4OS_PAPI_URL}${TOOLS_REFRESH_ROUTE} -H 'accept: application/json' -H 'Authorization: Bearer ${env.AI4OS_PAPI_SECRET}'"
                     response = sh (returnStdout: true, script: "${CURL_PAPI_CALL}").trim()
                     status_code = sh (returnStdout: true, script: "echo '${response}' |grep HTTP | awk '{print \$2}'").trim()
                     if (status_code != 200 && status_code != 201) {

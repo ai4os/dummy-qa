@@ -160,7 +160,7 @@ pipeline {
                     TOKEN = "asdfghjk"
                     CURL_CALL = "curl -si -X PUT https://api.dev.ai4eosc.eu/v1/catalog/tools/${env.REPO_NAME}/refresh -H 'accept: application/json' -H 'Authorization: Bearer ${TOKEN}'"
                     response = sh (returnStdout: true, script: "${CURL_CALL}").trim()
-                    status_code = sh (returnStdout: true, script: "echo ${response} |grep HTTP | awk '{print \$2}'").trim()
+                    status_code = sh (returnStdout: true, script: "echo ${response} |grep HTTP | awk '{print $2}'").trim()
                     println("STATUS_CODE: ${status_code}")
                     if (status_code != 200 && status_code != 201) {
                         error("[ERROR] Returned status code = $status_code when calling $CURL_CALL")

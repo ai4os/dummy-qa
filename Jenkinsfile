@@ -112,8 +112,7 @@ pipeline {
 
         stage("Docker build and push") {
             when {
-                when {
-                    expression {env.TOOLS.contains(env.REPO_URL)}
+                expression {env.TOOLS.contains(env.REPO_URL)}
                 anyOf {
                     branch 'main'
                     branch 'release/*'
@@ -147,7 +146,7 @@ pipeline {
 
         stage("Updating catalog page") {
             when {
-                expression {env.TOOLS.contains(env.REPO_URL)}
+                //expression {env.TOOLS.contains(env.REPO_URL)}
                 anyOf {
                     branch 'main'
                     branch 'master'

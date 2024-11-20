@@ -35,7 +35,8 @@ pipeline {
                         DOCKER_REGISTRY = env.AI4OS_REGISTRY
                         DOCKER_REGISTRY_ORG = env.AI4OS_REGISTRY_REPOSITORY
                         DOCKER_REGISTRY_CREDENTIALS = env.AI4OS_REGISTRY_CREDENTIALS
-                        AI4OS_PAPI_URL = env.AI4OS_PAPI_URL 
+                        // remove training "/" if present
+                        AI4OS_PAPI_URL = "${env.AI4OS_PAPI_URL.endsWith("/") ? env.AI4OS_PAPI_URL[0..-1] : env.AI4OS_PAPI_URL}"
                     }
                     // docker repository
                     DOCKER_REPO = DOCKER_REGISTRY_ORG + "/" + env.REPO_NAME
@@ -157,10 +158,9 @@ pipeline {
             }
             steps {
                 script {
-                    // build PAPI route to refrech the tool
+                    // build PAPI route to refresh the tool
                     //TOOLS_REFRESH_URL = "${AI4OS_PAPI_URL}/v1/catalog/tools/${env.REPO_NAME}/refresh"
-                    //          https://api.dev.ai4eosc.eu/v1/catalog/tools/ai4os-federated-server/refresh
-                    TOOLS_REFRESH_URL = "${AI4OS_PAPI_URL}v1/catalog/tools/ai4os-federated-server/refresh"
+                    TOOLS_REFRESH_URL = "${AI4OS_PAPI_URL}/v1/catalog/tools/ai4os-federated-server/refresh"
                     // have to use "'" to avoid injection of credentials
                     // see https://www.jenkins.io/doc/book/pipeline/jenkinsfile/#handling-credentials
                     CURL_PAPI_CALL = "curl -si -X PUT ${TOOLS_REFRESH_URL} -H 'accept: application/json' " + '-H "Authorization: Bearer $AI4OS_PAPI_SECRET"'

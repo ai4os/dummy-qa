@@ -160,7 +160,7 @@ pipeline {
                     TOOLS_REFRESH_URL = "${env.AI4OS_PAPI_URL}/v1/catalog/tools/${env.REPO_NAME}/refresh"
                     // have to use "'" to avoid injection of credentials
                     // see https://www.jenkins.io/doc/book/pipeline/jenkinsfile/#handling-credentials
-                    CURL_PAPI_CALL = 'curl -si -X PUT "$TOOLS_REFRESH_URL" -H "accept: application/json" -H "Authorization: Bearer $AI4OS_PAPI_SECRET"'
+                    CURL_PAPI_CALL = 'curl -si -X PUT "${TOOLS_REFRESH_URL}" -H "accept: application/json" -H "Authorization: Bearer $AI4OS_PAPI_SECRET"'
                     response = sh (returnStdout: true, script: CURL_PAPI_CALL).trim()
                     status_code = sh (returnStdout: true, script: "echo '${response}' |grep HTTP | awk '{print \$2}'").trim()
                     if (status_code != 200 && status_code != 201) {

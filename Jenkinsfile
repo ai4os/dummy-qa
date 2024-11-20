@@ -159,7 +159,7 @@ pipeline {
                 script {
                     // build PAPI route to refrech the tool
                     //TOOLS_REFRESH_URL = "${AI4OS_PAPI_URL}/v1/catalog/tools/${env.REPO_NAME}/refresh"
-                    TOOLS_REFRESH_URL = "${AI4OS_PAPI_URL}/v1/catalog/tools/ai4os-dev-env/refresh"
+                    TOOLS_REFRESH_URL = "${AI4OS_PAPI_URL}/v1/catalog/tools/ai4os-federated-server/refresh"
                     // have to use "'" to avoid injection of credentials
                     // see https://www.jenkins.io/doc/book/pipeline/jenkinsfile/#handling-credentials
                     CURL_PAPI_CALL = "curl -si -X PUT ${TOOLS_REFRESH_URL} -H 'accept: application/json' " + '-H "Authorization: Bearer $AI4OS_PAPI_SECRET"'

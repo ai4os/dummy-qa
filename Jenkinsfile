@@ -24,6 +24,7 @@ pipeline {
         TOOLS = sh (returnStdout: true, script: "curl -s ${TOOLS_CATALOG_URL}").trim()
         METADATA_VERSION = "2.0.0"
         AI4OS_REGISTRY_CREDENTIALS = credentials('AIOS-registry-credentials')
+        AI4OS_PAPI_SECRET = credentials('AIOS-PAPI-refresh-secret')
     }
     stages {
         stage("Variable initialization") {
@@ -158,7 +159,7 @@ pipeline {
                 script {
                     //PAPI_URL = env.AI4OS_PAPI_URL
                     TOOLS_REFRESH_ROUTE = "/v1/catalog/tools/${env.REPO_NAME}/refresh"
-                    CURL_PAPI_CALL = "curl -si -X PUT ${env.AI4OS_PAPI_URL}${TOOLS_REFRESH_ROUTE} -H 'accept: application/json' -H 'Authorization: Bearer ${env.AI4OS-PAPI-refresh-secret}'"
+                    CURL_PAPI_CALL = "curl -si -X PUT ${env.AI4OS_PAPI_URL}${TOOLS_REFRESH_ROUTE} -H 'accept: application/json' -H 'Authorization: Bearer ${env.AI4OS_PAPI_SECRET}'"
                     response = sh (returnStdout: true, script: "${CURL_PAPI_CALL}").trim()
                     status_code = sh (returnStdout: true, script: "echo '${response}' |grep HTTP | awk '{print \$2}'").trim()
                     if (status_code != 200 && status_code != 201) {

@@ -20,10 +20,10 @@ RUN apt-get update && \
         nano && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
-    rm -rf /tmp/* && \
+    rm -rf /tmp/*
 
 # Set LANG environment
-ENV LANG C.UTF-8
+ENV LANG=C.UTF-8
 
 # Set the working directory
 WORKDIR /srv

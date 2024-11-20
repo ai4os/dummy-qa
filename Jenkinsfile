@@ -151,8 +151,6 @@ pipeline {
                     branch 'main'
                     branch 'master'
                     branch 'release/*'
-                }
-                anyOf {
                     triggeredBy 'UserIdCause'
                 }
             }
@@ -161,8 +159,15 @@ pipeline {
                     //PAPI_URL = env.AI4OS_PAPI_URL
                     TOKEN = "asdfghjk"
                     CURL_CALL = "curl -si -X PUT https://api.dev.ai4eosc.eu/v1/catalog/tools/${env.REPO_NAME}/refresh -H 'accept: application/json' -H 'Authorization: Bearer ${TOKEN}'"
-                    status_code = sh (returnStdout: true, script: "${CURL_CALL}").trim()
+                    response = sh (returnStdout: true, script: "${CURL_CALL}").trim()
+                    status_code = sh (returnStdout: true, script: "echo ${response} |grep HTTP | awk '{print $2}'"
                     println("STATUS_CODE: ${status_code}")
+                    if (status_code != 200 && status_code != 201) {
+                        error("[ERROR] Returned status code = $status_code when calling $CURL_CALL")
+                    }
+                    //catchError(stageResult: 'FAILURE', buildResult: currentBuild.result) {
+                    //    error 'example of throwing an error'
+                    //}
                 }
             }
         }

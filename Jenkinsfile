@@ -20,6 +20,8 @@ pipeline {
         // Remove .git from the GIT_URL link and extract REPO_NAME from GIT_URL
         REPO_URL = "${env.GIT_URL.endsWith(".git") ? env.GIT_URL[0..-5] : env.GIT_URL}"
         REPO_NAME = "${REPO_URL.tokenize('/')[-1]}"
+        TOOLS_CATALOG_URL = "https://raw.githubusercontent.com/ai4os/tools-catalog/master/.gitmodules"
+        TOOLS = sh (returnStdout: true, script: "curl -s ${TOOLS_CATALOG_URL}").trim()
         METADATA_VERSION = "2.0.0"
         AI4OS_REGISTRY_CREDENTIALS = credentials('AIOS-registry-credentials')
     }
@@ -137,6 +139,28 @@ pipeline {
             post {
                 failure {
                     docker_clean()
+                }
+            }
+        }
+
+        stage("Updating catalog page") {
+            when {
+                expression {env.MODULES.contains(env.THIS_REPO)}
+                anyOf {
+                    branch 'main'
+                    branch 'master'
+                    branch 'release/*'
+                }
+                anyOf {
+                    triggeredBy 'UserIdCause'
+                }
+            }
+            steps {
+                script {
+                    URL = env.AI4OS_PAPI_URL
+                    CURL_CALL = "curl -si -X PUT https://api.dev.ai4eosc.eu/v1/catalog/tools/${env.REPO_NAME}/refresh -H 'accept: application/json' -H 'Authorization: Bearer $TOKEN'"
+                    status_code = sh (returnStdout: true, script: "${CURL_CALL}").trim()
+                    println("STATUS_CODE: ${status_code}")
                 }
             }
         }

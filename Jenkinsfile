@@ -157,8 +157,9 @@ pipeline {
             }
             steps {
                 script {
-                    URL = env.AI4OS_PAPI_URL
-                    CURL_CALL = "curl -si -X PUT https://api.dev.ai4eosc.eu/v1/catalog/tools/${env.REPO_NAME}/refresh -H 'accept: application/json' -H 'Authorization: Bearer $TOKEN'"
+                    //PAPI_URL = env.AI4OS_PAPI_URL
+                    TOKEN = "asdfghjk"
+                    CURL_CALL = "curl -si -X PUT https://api.dev.ai4eosc.eu/v1/catalog/tools/${env.REPO_NAME}/refresh -H 'accept: application/json' -H 'Authorization: Bearer ${TOKEN}'"
                     status_code = sh (returnStdout: true, script: "${CURL_CALL}").trim()
                     println("STATUS_CODE: ${status_code}")
                 }

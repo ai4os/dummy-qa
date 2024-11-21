@@ -156,14 +156,14 @@ pipeline {
                 AI4OS_PAPI_SECRET = credentials('AI4OS-PAPI-refresh-secret')
             }
             steps {
-                withFolderProperties {
-                    // retrieve PAPI_URL and remove trailing "/"
-                    AI4OS_PAPI_URL = "${env.AI4OS_PAPI_URL.endsWith("/") ? env.AI4OS_PAPI_URL[0..-2] : env.AI4OS_PAPI_URL}"
-                }
                 script {
                     // extract REPO_NAME from REPO_URL (.git already removed from REPO_URL)
                     REPO_NAME = "${REPO_URL.tokenize('/')[-1]}"
                     // build PAPI route to refresh the module
+                    withFolderProperties {
+                        // retrieve PAPI_URL and remove trailing slash "/"
+                        AI4OS_PAPI_URL = "${env.AI4OS_PAPI_URL.endsWith("/") ? env.AI4OS_PAPI_URL[0..-2] : env.AI4OS_PAPI_URL}"
+                    }
                     PAPI_REFRESH_URL = "${AI4OS_PAPI_URL}/v1/catalog/tools/${REPO_NAME}/refresh"
                     //PAPI_REFRESH_URL = "${AI4OS_PAPI_URL}/v1/catalog/tools/ai4os-federated-server/refresh"
                     // have to use "'" to avoid injection of credentials

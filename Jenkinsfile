@@ -164,8 +164,8 @@ pipeline {
                         // retrieve PAPI_URL and remove trailing slash "/"
                         AI4OS_PAPI_URL = "${env.AI4OS_PAPI_URL.endsWith("/") ? env.AI4OS_PAPI_URL[0..-2] : env.AI4OS_PAPI_URL}"
                     }
-                    PAPI_REFRESH_URL = "${AI4OS_PAPI_URL}/v1/catalog/tools/${REPO_NAME}/refresh"
-                    //PAPI_REFRESH_URL = "${AI4OS_PAPI_URL}/v1/catalog/tools/ai4os-federated-server/refresh"
+                    //PAPI_REFRESH_URL = "${AI4OS_PAPI_URL}/v1/catalog/tools/${REPO_NAME}/refresh"
+                    PAPI_REFRESH_URL = "${AI4OS_PAPI_URL}/v1/catalog/tools/ai4os-federated-server/refresh"
                     // have to use "'" to avoid injection of credentials
                     // see https://www.jenkins.io/doc/book/pipeline/jenkinsfile/#handling-credentials
                     CURL_PAPI_CALL = "curl -si -X PUT ${PAPI_REFRESH_URL} -H 'accept: application/json' " + 

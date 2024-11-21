@@ -142,7 +142,7 @@ pipeline {
             }
         }
 
-        stage("Updating Catalog page") {
+        stage("Update Catalog page") {
             when {
                 //expression {env.MODULES.contains(env.REPO_URL)}
                 anyOf {
@@ -157,22 +157,23 @@ pipeline {
             }
             steps {
                 withFolderProperties {
-                    script {
-                        // extract REPO_NAME from REPO_URL (.git already removed from REPO_URL)
-                        REPO_NAME = "${REPO_URL.tokenize('/')[-1]}"
-                        // build PAPI route to refresh the module
-                        AI4OS_PAPI_URL = "${env.AI4OS_PAPI_URL.endsWith("/") ? env.AI4OS_PAPI_URL[0..-2] : env.AI4OS_PAPI_URL}"
-                        PAPI_REFRESH_URL = "${AI4OS_PAPI_URL}/v1/catalog/tools/${REPO_NAME}/refresh"
-                        //PAPI_REFRESH_URL = "${AI4OS_PAPI_URL}/v1/catalog/tools/ai4os-federated-server/refresh"
-                        // have to use "'" to avoid injection of credentials
-                        // see https://www.jenkins.io/doc/book/pipeline/jenkinsfile/#handling-credentials
-                        CURL_PAPI_CALL = "curl -si -X PUT ${PAPI_REFRESH_URL} -H 'accept: application/json' " + 
-                            '-H "Authorization: Bearer $AI4OS_PAPI_SECRET"'
-                        response = sh (returnStdout: true, script: CURL_PAPI_CALL).trim()
-                        status_code = sh (returnStdout: true, script: "echo '${response}' |grep HTTP | awk '{print \$2}'").trim().toInteger()
-                        if (status_code != 200 && status_code != 201) {
-                            error("Returned status code = $status_code when calling $PAPI_REFRESH_URL")
-                        }
+                    // retrieve PAPI_URL and remove trailing "/"
+                    AI4OS_PAPI_URL = "${env.AI4OS_PAPI_URL.endsWith("/") ? env.AI4OS_PAPI_URL[0..-2] : env.AI4OS_PAPI_URL}"
+                }
+                script {
+                    // extract REPO_NAME from REPO_URL (.git already removed from REPO_URL)
+                    REPO_NAME = "${REPO_URL.tokenize('/')[-1]}"
+                    // build PAPI route to refresh the module
+                    PAPI_REFRESH_URL = "${AI4OS_PAPI_URL}/v1/catalog/tools/${REPO_NAME}/refresh"
+                    //PAPI_REFRESH_URL = "${AI4OS_PAPI_URL}/v1/catalog/tools/ai4os-federated-server/refresh"
+                    // have to use "'" to avoid injection of credentials
+                    // see https://www.jenkins.io/doc/book/pipeline/jenkinsfile/#handling-credentials
+                    CURL_PAPI_CALL = "curl -si -X PUT ${PAPI_REFRESH_URL} -H 'accept: application/json' " + 
+                        '-H "Authorization: Bearer $AI4OS_PAPI_SECRET"'
+                    response = sh (returnStdout: true, script: CURL_PAPI_CALL).trim()
+                    status_code = sh (returnStdout: true, script: "echo '${response}' |grep HTTP | awk '{print \$2}'").trim().toInteger()
+                    if (status_code != 200 && status_code != 201) {
+                        error("Returned status code = $status_code when calling $PAPI_REFRESH_URL")
                     }
                 }
             }

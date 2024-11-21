@@ -17,14 +17,12 @@ pipeline {
         label 'docker'
     }
     environment {
-        // Remove .git from the GIT_URL link and extract REPO_NAME from GIT_URL
+        // Remove .git from the GIT_URL link
         REPO_URL = "${env.GIT_URL.endsWith(".git") ? env.GIT_URL[0..-5] : env.GIT_URL}"
-        REPO_NAME = "${REPO_URL.tokenize('/')[-1]}"
         TOOLS_CATALOG_URL = "https://raw.githubusercontent.com/ai4os/tools-catalog/master/.gitmodules"
         TOOLS = sh (returnStdout: true, script: "curl -s ${TOOLS_CATALOG_URL}").trim()
         METADATA_VERSION = "2.0.0"
         AI4OS_REGISTRY_CREDENTIALS = credentials('AIOS-registry-credentials')
-        AI4OS_PAPI_SECRET = credentials('AI4OS-PAPI-refresh-secret')
     }
     stages {
         stage("Variable initialization") {
@@ -35,8 +33,6 @@ pipeline {
                         DOCKER_REGISTRY = env.AI4OS_REGISTRY
                         DOCKER_REGISTRY_ORG = env.AI4OS_REGISTRY_REPOSITORY
                         DOCKER_REGISTRY_CREDENTIALS = env.AI4OS_REGISTRY_CREDENTIALS
-                        // remove trailing "/" if present
-                        AI4OS_PAPI_URL = "${env.AI4OS_PAPI_URL.endsWith("/") ? env.AI4OS_PAPI_URL[0..-2] : env.AI4OS_PAPI_URL}"
                     }
                     // docker repository
                     DOCKER_REPO = DOCKER_REGISTRY_ORG + "/" + env.REPO_NAME
@@ -146,9 +142,9 @@ pipeline {
             }
         }
 
-        stage("Updating catalog page") {
+        stage("Updating Catalog page") {
             when {
-                //expression {env.TOOLS.contains(env.REPO_URL)}
+                //expression {env.MODULES.contains(env.REPO_URL)}
                 anyOf {
                     branch 'main'
                     branch 'master'
@@ -156,18 +152,27 @@ pipeline {
                     triggeredBy 'UserIdCause'
                 }
             }
+            environment {
+                AI4OS_PAPI_SECRET = credentials('AI4OS-PAPI-refresh-secret')
+            }
             steps {
-                script {
-                    // build PAPI route to refresh the tool
-                    TOOLS_REFRESH_URL = "${AI4OS_PAPI_URL}/v1/catalog/tools/${env.REPO_NAME}/refresh"
-                    //TOOLS_REFRESH_URL = "${AI4OS_PAPI_URL}/v1/catalog/tools/ai4os-federated-server/refresh"
-                    // have to use "'" to avoid injection of credentials
-                    // see https://www.jenkins.io/doc/book/pipeline/jenkinsfile/#handling-credentials
-                    CURL_PAPI_CALL = "curl -si -X PUT ${TOOLS_REFRESH_URL} -H 'accept: application/json' " + '-H "Authorization: Bearer $AI4OS_PAPI_SECRET"'
-                    response = sh (returnStdout: true, script: CURL_PAPI_CALL).trim()
-                    status_code = sh (returnStdout: true, script: "echo '${response}' |grep HTTP | awk '{print \$2}'").trim().toInteger()
-                    if (status_code != 200 && status_code != 201) {
-                        error("Returned status code = $status_code when calling $TOOLS_REFRESH_URL")
+                withFolderProperties {
+                    script {
+                        // extract REPO_NAME from REPO_URL (.git already removed from REPO_URL)
+                        REPO_NAME = "${REPO_URL.tokenize('/')[-1]}"
+                        // build PAPI route to refresh the module
+                        AI4OS_PAPI_URL = "${env.AI4OS_PAPI_URL.endsWith("/") ? env.AI4OS_PAPI_URL[0..-2] : env.AI4OS_PAPI_URL}"
+                        //PAPI_REFRESH_URL = "${AI4OS_PAPI_URL}/v1/catalog/tools/${REPO_NAME}/refresh"
+                        PAPI_REFRESH_URL = "${AI4OS_PAPI_URL}/v1/catalog/tools/ai4os-federated-server/refresh"
+                        // have to use "'" to avoid injection of credentials
+                        // see https://www.jenkins.io/doc/book/pipeline/jenkinsfile/#handling-credentials
+                        CURL_PAPI_CALL = "curl -si -X PUT ${PAPI_REFRESH_URL} -H 'accept: application/json' " + 
+                            '-H "Authorization: Bearer $AI4OS_PAPI_SECRET"'
+                        response = sh (returnStdout: true, script: CURL_PAPI_CALL).trim()
+                        status_code = sh (returnStdout: true, script: "echo '${response}' |grep HTTP | awk '{print \$2}'").trim().toInteger()
+                        if (status_code != 200 && status_code != 201) {
+                            error("Returned status code = $status_code when calling $PAPI_REFRESH_URL")
+                        }
                     }
                 }
             }
